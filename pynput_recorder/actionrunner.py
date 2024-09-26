@@ -21,7 +21,10 @@ class ActionRunner(object):
 
         self.on_stop = on_stop
         self.original_screen_size = None # 录制时的原始屏幕大小
-        self.screen_size = [root.winfo_screenwidth(), root.winfo_screenheight()]  # 运行时的屏幕大小，实例化时就要获得，否则报错 RuntimeError: main thread is not in main loop
+        try:
+            self.screen_size = [root.winfo_screenwidth(), root.winfo_screenheight()]  # 运行时的屏幕大小，实例化时就要获得，否则报错 RuntimeError: main thread is not in main loop
+        except:
+            self.screen_size = None
         self.screen_scale_ratio = None  # 屏幕缩放比例
 
     def fix_position_by_screen_size(self, params):
@@ -56,11 +59,12 @@ class ActionRunner(object):
                 print(f"{action}: {params}")
                 if action == 'screen_size':
                     self.original_screen_size = params
-                    wr = self.screen_size[0] / self.original_screen_size[0]
-                    hr = self.original_screen_size[1]
-                    if wr != 1 and hr != 1:
-                        self.screen_scale_ratio = [wr, self.screen_size[1] / hr] # 屏幕缩放比例
-                        print(f"屏幕缩放比例: {self.screen_scale_ratio}")
+                    if self.screen_size is not None:
+                        wr = self.screen_size[0] / self.original_screen_size[0]
+                        hr = self.original_screen_size[1]
+                        if wr != 1 and hr != 1:
+                            self.screen_scale_ratio = [wr, self.screen_size[1] / hr] # 屏幕缩放比例
+                            print(f"屏幕缩放比例: {self.screen_scale_ratio}")
                 elif action == 'press_key':
                     keyboard_runner.press(self.from_key_vk(params))
                 elif action == 'release_key':
